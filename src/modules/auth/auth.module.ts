@@ -21,24 +21,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     SessionModule,
     CryptoModule,
     TypeOrmModule.forFeature([User, Sessions, VerificationToken]),
-    ScheduleModule.forRoot(),
-    JwtModule.registerAsync({
-      inject: [EnvService],
-      imports: [EnvModule],
-      global: true,
-      useFactory(env: EnvService) {
-        const privateKey = env.get('JWT_PRIVATE_KEY');
-        const publicKey = env.get('JWT_PUBLIC_KEY');
-
-        return {
-          privateKey,
-          publicKey,
-          signOptions: {
-            algorithm: 'RS256',
-          },
-        };
-      },
-    }),
+    ScheduleModule.forRoot()
   ],
 })
 export class AuthModule {}

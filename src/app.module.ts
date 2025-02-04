@@ -8,6 +8,9 @@ import { UserModule } from './modules/user/user.module';
 import { CryptoModule } from './commons/crypto/crypto.module';
 import { HealthcheckModule } from './modules/healthcheck/healthcheck.module';
 import { SessionModule } from './modules/session/session.module';
+import { BullModule } from '@nestjs/bullmq';
+import { EnvService } from './commons/env/env.service';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -23,6 +26,37 @@ import { SessionModule } from './modules/session/session.module';
       synchronize: true,
       logging: true,
       autoLoadEntities: true,
+    }),
+
+    BullModule.forRootAsync({
+      inject: [EnvService],
+      imports: [EnvModule],
+      useFactory(env: EnvService) {
+        return {
+          connection: {
+            host: env.get('REDIS_HOST'),
+            port: parseInt(env.get('REDIS_PORT')),
+          },
+        };
+      },
+    }),
+
+    JwtModule.registerAsync({
+      inject: [EnvService],
+      imports: [EnvModule],
+      global: true,
+      useFactory(env: EnvService) {
+        const privateKey = env.get('JWT_PRIVATE_KEY');
+        const publicKey = env.get('JWT_PUBLIC_KEY');
+
+        return {
+          privateKey,
+          publicKey,
+          signOptions: {
+            algorithm: 'RS256',
+          },
+        };
+      },
     }),
 
     EnvModule,
