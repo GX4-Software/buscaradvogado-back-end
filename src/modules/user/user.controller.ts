@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Param, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, UseGuards, UseInterceptors, UploadedFiles, BadRequestException } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserRequestDTO, UserResponseDTO } from './dto/create-user.dto';
 import {
@@ -12,6 +12,7 @@ import { CryptoService } from 'src/commons/crypto/crypto.service';
 import { CurrentUser } from 'src/commons/decorators/current-user.decorator';
 import { User } from 'src/entities';
 import { AuthGuard } from 'src/commons/guards/auth.guard';
+import { AnyFilesInterceptor } from '@nestjs/platform-express';
 
 @Controller('user')
 export class UserController {
@@ -39,6 +40,24 @@ export class UserController {
   @ApiResponse({ status: 404, description: 'User not found' })
   verifyEmail(@Param('email') email: string) {
     return this.userService.verifyEmail(email);
+  }
+
+  @Post('complete-profile')
+  @UseGuards(AuthGuard)
+  @UseInterceptors(AnyFilesInterceptor())
+  @ApiOperation({ summary: 'Complete user profile' })
+  @ApiResponse({ status: 200, description: 'Profile completed' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiBearerAuth()
+  completeProfile(@CurrentUser() user: User, @UploadedFiles() files: Array<Express.Multer.File>) {
+    const rg = files.find(file => file.fieldname === 'rg');
+    const cpf = files.find(file => file.fieldname === 'cpf');
+
+    if (!rg || !cpf) {
+      throw new BadRequestException('RG and CPF are required');
+    }     
+
+    return this.userService.completeProfile(user, rg, cpf);
   }
 
   @Get('me')

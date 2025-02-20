@@ -36,13 +36,13 @@ export class User {
   @Column()
   password: string;
 
-  @Column({ nullable: true })
+  @Column({ default: null })
   avatar?: string;
 
-  @Column()
+  @Column({ default: null })
   cpf: string;
 
-  @Column()
+  @Column({ default: null })
   rg: string;
 
   @Column({ name: 'birth_date' })
@@ -65,6 +65,9 @@ export class User {
 
   @Column({ name: 'email_verified' })
   emailVerified: boolean = false;
+
+  @Column({ name: 'profile_completed', default: false })
+  profileCompleted: boolean = false;
 
   @Column({
     type: 'enum',

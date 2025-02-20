@@ -8,6 +8,8 @@ import { User } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CryptoService } from 'src/commons/crypto/crypto.service';
+import { S3Service } from '../s3/s3.service';
+import { EnvService } from 'src/commons/env/env.service';
 
 @Injectable()
 export class UserService {
@@ -15,11 +17,13 @@ export class UserService {
     @InjectRepository(User)
     private userRepository: Repository<User>,
     private cryptoService: CryptoService,
+    private s3Service: S3Service,
+    private env: EnvService,
   ) {}
 
   public async create(createUserDto: CreateUserRequestDTO) {
     const verifyEmail = await this.userRepository.findOne({
-      where: { email: createUserDto.email },
+      where: { email: createUserDto.email, profileCompleted: false },
     });
 
     if (verifyEmail) {
@@ -28,14 +32,39 @@ export class UserService {
 
     const user = this.userRepository.create(createUserDto);
     user.password = await this.cryptoService.hashPassword(user.password);
-    user.cpf = this.cryptoService.encrypt(user.cpf);
-    user.rg = this.cryptoService.encrypt(user.rg);
     user.phone = this.cryptoService.encrypt(user.phone);
 
     this.userRepository.save(user);
 
     return {
       message: 'User created successfully',
+    };
+  }
+
+  public async completeProfile(userData: User, rg: Express.Multer.File, cpf: Express.Multer.File) {
+    if(userData.profileCompleted) {
+      throw new BadRequestException('Profile already completed');
+    }
+
+    const rgKey = await this.s3Service.uploadFile(this.env.get('S3_PRIMARY_BUCKET'), rg.originalname, rg.buffer, rg.mimetype);
+    const cpfKey = await this.s3Service.uploadFile(this.env.get('S3_PRIMARY_BUCKET'), cpf.originalname, cpf.buffer, cpf.mimetype);
+
+    const rgUrl = await this.s3Service.getUrl(this.env.get('S3_PRIMARY_BUCKET'), rgKey);
+    const cpfUrl = await this.s3Service.getUrl(this.env.get('S3_PRIMARY_BUCKET'), cpfKey);
+
+    const rgCrypto = this.cryptoService.encrypt(rgUrl);
+    const cpfCrypto = this.cryptoService.encrypt(cpfUrl);
+
+    await this.userRepository.update({
+      id: userData.id,
+    }, {
+      rg: rgCrypto,
+      cpf: cpfCrypto,
+      profileCompleted: true,
+    });    
+
+    return {
+      message: 'Profile completed successfully', 
     };
   }
 

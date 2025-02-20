@@ -32,15 +32,15 @@ export class CreateUserRequestDTO {
   @ApiProperty({ description: 'Avatar' })
   avatar: string;
 
-  @IsString()
-  @IsNotEmpty()
-  @ApiProperty({ description: 'CPF' })
-  cpf: string;
+  // @IsString()
+  // @IsNotEmpty()
+  // @ApiProperty({ description: 'CPF' })
+  // cpf: string;
 
-  @IsString()
-  @IsNotEmpty()
-  @ApiProperty({ description: 'RG' })
-  rg: string;
+  // @IsString()
+  // @IsNotEmpty()
+  // @ApiProperty({ description: 'RG' })
+  // rg: string;
 
   @IsString()
   @IsNotEmpty()
