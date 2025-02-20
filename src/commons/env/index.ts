@@ -17,6 +17,18 @@ export const envSchema = z.object({
 
   REDIS_HOST: z.string(),
   REDIS_PORT: z.coerce.number(),
+
+  EMAIL_HOST: z.string(),
+  EMAIL_USER: z.string(),
+  EMAIL_PASS: z.string(),
+  EMAIL_FROM: z.string(),
+  EMAIL_PORT: z.coerce.number(),
+
+  S3_REGION: z.string(),
+  S3_ENDPOINT: z.string(),
+  S3_ACCESS_KEY_ID: z.string(),
+  S3_ACCESS_KEY_SECRET: z.string(),
+  S3_PRIMARY_BUCKET: z.string(),
 });
 
 export type Env = z.infer<typeof envSchema>;
