@@ -11,6 +11,10 @@ import { SessionModule } from './modules/session/session.module';
 import { BullModule } from '@nestjs/bullmq';
 import { EnvService } from './commons/env/env.service';
 import { JwtModule } from '@nestjs/jwt';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { EmailModule } from './modules/email/email.module';
+import { S3Module } from './modules/s3/s3.module';
+
 
 @Module({
   imports: [
@@ -65,6 +69,8 @@ import { JwtModule } from '@nestjs/jwt';
     CryptoModule,
     HealthcheckModule,
     SessionModule,
+    EmailModule,
+    S3Module
   ],
   controllers: [],
   providers: [],
