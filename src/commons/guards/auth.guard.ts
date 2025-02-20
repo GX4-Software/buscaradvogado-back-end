@@ -53,8 +53,10 @@ export class AuthGuard implements CanActivate {
     request.user = userWithoutPassword as User;
     request.session = user.session;
 
-    request.user.cpf = this.cryptoService.decrypt(request.user.cpf);
-    request.user.rg = this.cryptoService.decrypt(request.user.rg);
+    if(request.user.profileCompleted) {
+      request.user.cpf = this.cryptoService.decrypt(request.user.cpf);
+      request.user.rg = this.cryptoService.decrypt(request.user.rg);
+    }
     request.user.phone = this.cryptoService.decrypt(request.user.phone);
 
     return true;
