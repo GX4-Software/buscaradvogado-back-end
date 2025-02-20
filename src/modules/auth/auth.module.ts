@@ -12,16 +12,19 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { CryptoModule } from 'src/commons/crypto/crypto.module';
 import { AuthSchedule } from './auth.schedule';
 import { ScheduleModule } from '@nestjs/schedule';
+import { EmailModule } from '../email/email.module';
 
 @Module({
   controllers: [AuthController],
-  providers: [AuthService, AuthSchedule],
+  providers: [AuthService, AuthSchedule, EnvService],
   imports: [
     UserModule,
     SessionModule,
     CryptoModule,
     TypeOrmModule.forFeature([User, Sessions, VerificationToken]),
-    ScheduleModule.forRoot()
+    ScheduleModule.forRoot(),
+    EmailModule,
+    EnvModule,
   ],
 })
 export class AuthModule {}

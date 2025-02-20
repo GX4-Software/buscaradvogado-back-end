@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Query } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiResponse } from '@nestjs/swagger';
 import { ApiOperation } from '@nestjs/swagger';
@@ -33,7 +33,7 @@ export class AuthController {
     return this.authService.signInWithCredentials(body);
   }
 
-  @Post('verify-two-factor-authentication')
+  @Get('verify-two-factor-authentication')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Verify two factor authentication',
@@ -47,9 +47,7 @@ export class AuthController {
     status: HttpStatus.UNAUTHORIZED,
     description: 'Invalid token',
   })
-  verifyTwoFactorAuthentication(
-    @Body() body: VerifyTwoFactorAuthenticationDTO,
-  ) {
-    return this.authService.verifyTwoFactorAuthentication(body.token);
+  verifyTwoFactorAuthentication(@Query() query: VerifyTwoFactorAuthenticationDTO) {
+    return this.authService.verifyTwoFactorAuthentication(query.token);
   }
 }

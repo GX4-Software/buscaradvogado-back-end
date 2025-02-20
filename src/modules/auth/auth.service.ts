@@ -7,6 +7,8 @@ import { CryptoService } from 'src/commons/crypto/crypto.service';
 import { User, VerificationToken } from 'src/entities';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { EmailService } from '../email/email.service';
+import { EnvService } from 'src/commons/env/env.service';
 
 @Injectable()
 export class AuthService {
@@ -17,6 +19,8 @@ export class AuthService {
     private readonly cryptoService: CryptoService,
     @InjectRepository(VerificationToken)
     private readonly verificationTokenRepository: Repository<VerificationToken>,
+    private readonly emailService: EmailService,
+    private readonly envService: EnvService,
   ) {}
 
   public async signInWithCredentials(body: SignInWithCredentialsDTO) {
@@ -50,7 +54,13 @@ export class AuthService {
 
     const token = await this.verificationTokenRepository.save(generatedToken);
 
-    console.log(token);
+    await this.emailService.sendMagicLinkEmail(
+      user.email,
+      user.firstName,
+      this.envService.get('ORIGIN_URL') +
+        '/auth/verify-two-factor-authentication?token=' +
+        token.id,
+    );
 
     return;
   }
